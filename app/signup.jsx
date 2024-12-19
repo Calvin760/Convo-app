@@ -7,6 +7,7 @@ import theme from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { supabase } from '../lib/supabase';
+import BackButton from '../components/BackButton';
 
 const SignUp = () => {
     const router = useRouter();
@@ -52,6 +53,7 @@ const SignUp = () => {
     return (
         <ScreenWrapper bg="white">
             <View style={styles.container}>
+                <BackButton router={router} />
                 <Text style={styles.title}>Sign Up</Text>
                 <Text style={styles.subtitle}>Let's get started</Text>
                 <View style={styles.form}>
@@ -92,10 +94,10 @@ const SignUp = () => {
                     </View>
                     {/* Sign Up Button */}
                     <Button
-                        title={loading ? 'Signing Up...' : 'Sign Up'}
+                        title={'Sign Up'}
                         buttonStyle={styles.button}
                         onPress={handleSignUp}
-                        disabled={loading}
+                        loading={loading}
                     />
                 </View>
                 <View style={styles.footer}>
@@ -144,6 +146,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: theme.colors.border || '#ddd',
         borderRadius: theme.borderRadius.medium,
+        borderRadius: hp(3.3),
         paddingHorizontal: wp(4),
         marginBottom: hp(2),
         backgroundColor: 'white',

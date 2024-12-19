@@ -4,6 +4,7 @@ const theme = {
         primary: "#1DA1F2", // Main brand color (e.g., Twitter blue)
         secondary: "#14171A", // Dark mode background
         accent: "#FFAD1F", // Highlight or accent color
+        lightGrey: "#D3D3D3",
         background: {
             light: "#FFFFFF", // Light mode background
             dark: "#000000", // Dark mode background

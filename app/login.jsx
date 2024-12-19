@@ -7,6 +7,8 @@ import theme from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { supabase } from '../lib/supabase'; // Ensure this is properly imported
+import BackButton from '../components/BackButton';
+import { StatusBar } from 'expo-status-bar';
 
 const Login = () => {
     const router = useRouter();
@@ -21,12 +23,12 @@ const Login = () => {
         const password = passwordRef.current?.trim();
 
         if (!email || !password) {
-            Alert.alert('Login', 'Please fill all the fields!');
+            Alert.alert('Login', 'Please fill all the fields!')
             return;
         }
 
         if (!isValidEmail(email)) {
-            Alert.alert('Login', 'Please enter a valid email address!');
+            Alert.alert('Login', 'Please enter a valid email address!')
             return;
         }
 
@@ -40,7 +42,7 @@ const Login = () => {
         setLoading(false);
 
         console.log('session: ', session);
-        console.log('error: ', error);
+        // console.log('error: ', error);
 
         if (error) {
             Alert.alert('Login', error.message);
@@ -53,7 +55,9 @@ const Login = () => {
 
     return (
         <ScreenWrapper bg="white">
+            <StatusBar style="dark"/>
             <View style={styles.container}>
+                <BackButton router={router}/>
                 <Text style={styles.welcomeMessage}>Hey, Welcome Back!</Text>
                 <Text style={styles.title}>Login</Text>
                 <View style={styles.form}>
@@ -81,10 +85,10 @@ const Login = () => {
                     </View>
 
                     <Button
-                        title={loading ? 'Logging in...' : 'Login'}
+                        title={'Login'}
                         buttonStyle={styles.button}
                         onPress={onSubmit}
-                        disabled={loading}
+                        loading={loading}
                     />
                 </View>
                 <View style={styles.footer}>
@@ -141,6 +145,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         height: hp(6.5),
         width: '100%',
+        borderRadius: hp(3.3),
     },
     input: {
         flex: 1,

@@ -1,5 +1,5 @@
 import { Image, StyleSheet, Text, View, Pressable } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import ScreenWrapper from '../components/ScreenWrapper';
 import { StatusBar } from 'expo-status-bar';
 import { hp, wp } from '../helpers/common';
@@ -9,6 +9,8 @@ import { useRouter } from 'expo-router';
 
 const Welcome = () => {
   const router =useRouter();
+  const [loading, setLoading] = useState(false);
+  
   return (
     <ScreenWrapper bg="white">
       <StatusBar style="dark" />
@@ -33,7 +35,10 @@ const Welcome = () => {
             onPress={() => {
               router.push('signup')
               console.log('Getting Started pressed');
-            }}
+            
+            }
+          }
+            loading={loading}
           />
           <View style={styles.bottomTextContainer}>
             <Text style={styles.loginPromptText}>Already have an account?</Text>

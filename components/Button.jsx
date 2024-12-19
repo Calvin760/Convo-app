@@ -2,7 +2,8 @@ import { Pressable, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import React from 'react';
 import theme from '../constants/theme';
 import { hp, wp } from '../helpers/common';
-
+import Loading from '../components/Loading';
+import { View } from 'react-native';
 const Button = ({
   buttonStyle,
   textStyle,
@@ -17,25 +18,32 @@ const Button = ({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 8, // Android elevation for shadow
+    elevation: 8,
   };
 
+    if(loading){
+     return (
+       <View style={[styles.button, buttonStyle, {backgroundColor: 'white'}]}>
+         <Loading/>
+       </View>
+     )
+   }
   return (
+
     <Pressable
       onPress={loading ? null : onPress} // Disable when loading
       style={({ pressed }) => [
         styles.button,
         buttonStyle,
         hasShadow && shadowStyle,
-        pressed && styles.pressedEffect, // Slight effect on press
+        pressed && styles.pressedEffect,
         loading && styles.disabledButton,
       ]}
     >
-      {loading ? (
-        <ActivityIndicator size="small" color="white" />
-      ) : (
+ (
         <Text style={[styles.text, textStyle]}>{title}</Text>
-      )}
+      )
+      
     </Pressable>
   );
 };
