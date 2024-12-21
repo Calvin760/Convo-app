@@ -43,7 +43,7 @@ const Search = () => {
     // Render each search result
     const renderSearchResult = ({ item }) => (
         <View style={styles.resultContainer}>
-            <Pressable onPress={() => router.push(`/profile/${item.id}`)}>
+            <Pressable onPress={() => router.push(`${item.id}`)}>
                 <Image source={{ uri: item.image || 'https://via.placeholder.com/150' }} style={styles.resultImage} />
                 <Text style={styles.resultName}>{item.name}</Text>
             </Pressable>

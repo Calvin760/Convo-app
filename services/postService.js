@@ -1,6 +1,23 @@
 import { supabase } from "../lib/supabase";
 import { uploadFile } from "./imageServices";
 
+export const getPosts = async () => {
+      try {
+        // setLoading(true); // Show loading spinner
+        const { data, error } = await supabase
+          .from('posts')
+          .select('*, users(name, image, id , email, phoneNumber, bio)')  // Fetching the user name and image as well
+          .order('created_at', { ascending: false })
+          .limit(10);  // Limit posts to 10
+
+        if (error) throw error;
+        // setPosts(data || []);
+      } catch (error) {
+        // console.error('Error fetching posts:', error);
+      } finally {
+        // setLoading(false); // Hide loading spinner after fetching data
+      }
+    };
 export const createOrUpdatePost = async (post) => {
     try {
         // If post has a file (image or video), upload it
@@ -35,5 +52,45 @@ export const createOrUpdatePost = async (post) => {
     } catch (error) {
         console.log('createOrUpdatePost error', error);
         return { success: false, msg: "An error occurred while creating the post" };
+    }
+};
+
+export const createPostLike = async (postLike) => {
+    try {
+        const { data, error } = await supabase
+            .from('postsLikes')
+            .upsert(postLike)
+            .select()
+            .single();
+
+        if (error) {
+            console.log('Error liking post:', error);
+            return { success: false, msg: "Could not like post" };
+        }
+
+        return { success: true, data: data }; // Return the success result with post data
+        }catch (error) {
+        console.log('createPostLike error', error);
+        return { success: false, msg: "An error occurred while liking the post" };
+    }
+};
+
+export const removePostLike = async (postLike) => {
+    try {
+        const { data, error } = await supabase
+            .from('postsLikes')
+            .delete()
+            .eq('userId', userId)
+            .eq('postId', postId)
+
+        if (error) {
+            console.log('Error liking post:', error);
+            return { success: false, msg: "Could not remove like post" };
+        }
+
+        return { success: true, data: data }; // Return the success result with post data
+    } catch (error) {
+        console.log('removePostLike error', error);
+        return { success: false, msg: "An error occurred while removing like the post" };
     }
 };

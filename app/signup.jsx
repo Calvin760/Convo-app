@@ -47,7 +47,7 @@ const SignUp = () => {
         }
 
         Alert.alert('Sign Up', 'Account created successfully! Please check your email to confirm.');
-        router.push('home'); // Navigate to Login screen after sign-up
+        router.push('login'); // Navigate to Login screen after sign-up
     };
 
     return (

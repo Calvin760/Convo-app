@@ -65,25 +65,30 @@ const Profile = () => {
     const fileType = item.file?.split('.').pop()?.toLowerCase(); // Extract file type (image or video)
 
     // If file is a video, render the Video component, otherwise render Image
-    if (fileType === 'mp4' || fileType === 'mov' || fileType === 'avi') {
-      return (
-        <Video
-          source={{ uri: item.file }}  // Video source
-          style={styles.postImage}
-          useNativeControls
-          resizeMode="cover"
-          isLooping
-        />
-      );
-    } else {
-      return <Image source={{ uri: item.file }} style={styles.postImage} />;
-    }
+    return (
+      <Pressable
+        style={styles.postContainer}
+        onPress={() => router.push((`/posts/${item.id}`))}
+      >
+        {fileType === 'mp4' || fileType === 'mov' || fileType === 'avi' ? (
+          <Video
+            source={{ uri: item.file }}  // Video source
+            style={styles.postImage}
+            useNativeControls
+            resizeMode="cover"
+            isLooping
+          />
+        ) : (
+          <Image source={{ uri: item.file }} style={styles.postImage} />
+        )}
+      </Pressable>
+    );
   };
 
   return (
     <ScreenWrapper>
       <View style={styles.header}>
-        <Pressable onPress={() => router.push('home')}>
+        <Pressable onPress={() => router.back()}>
           <AntDesign name="arrowleft" size={28} color="black" />
         </Pressable>
         <Text style={styles.headerTitle}>Profile</Text>

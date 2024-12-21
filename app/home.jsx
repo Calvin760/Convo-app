@@ -35,23 +35,65 @@ const Home = () => {
       }
     };
 
+    // Function to get the like count for a specific postId
+    const getPostLikeCount = async (postId) => {
+      const { data, error } = await supabase
+        .from('postLikes')
+        .select('postId')
+        .eq('postId', postId);
+      if (error) {
+        console.error('Error fetching like count:', error);
+        return 0;
+      }
+      return data.length; // Return the like count for the post
+    };
+
     const fetchPosts = async () => {
       try {
-        setLoading(true); // Show loading spinner
+        setLoading(true);
         const { data, error } = await supabase
           .from('posts')
-          .select('*, users(name, image)')
+          .select('*, users(name, image, id, email, phoneNumber, bio)')
           .order('created_at', { ascending: false })
-          .limit(10);  // Limit posts to 10
+          .limit(10); // Limit posts to 10
 
         if (error) throw error;
-        setPosts(data || []);
+
+        // Fetch like count for each post
+        const postsWithLikeCount = await Promise.all(data.map(async (post) => {
+          const { data: likeData, error: likeError } = await supabase
+            .from('postLikes')
+            .select('postId')
+            .eq('postId', post.id);
+
+          if (likeError) throw likeError;
+
+          return {
+            ...post,
+            likeCount: likeData.length, // Add likeCount to the post object
+          };
+        }));
+
+        // Fetch liked posts for the current user
+        const { data: likedPostsData, error: likedError } = await supabase
+          .from('postLikes')
+          .select('postId')
+          .eq('userId', user.id);
+
+        if (likedError) throw likedError;
+
+        // Map liked posts into a Set
+        const likedPostIds = new Set(likedPostsData?.map((like) => like.postId));
+
+        setPosts(postsWithLikeCount); // Set posts with likeCount
+        setLikedPosts(likedPostIds); // Set liked posts state
       } catch (error) {
         console.error('Error fetching posts:', error);
       } finally {
-        setLoading(false); // Hide loading spinner after fetching data
+        setLoading(false);
       }
     };
+
 
     fetchUserData();
     fetchPosts();
@@ -87,14 +129,52 @@ const Home = () => {
     }
   };
 
-  const toggleLike = (postId) => {
-    setLikedPosts(prev => {
-      const updated = new Set(prev);
-      if (updated.has(postId)) updated.delete(postId);
-      else updated.add(postId);
-      return updated;
-    });
+  const toggleLike = async (postId) => {
+    const alreadyLiked = likedPosts.has(postId);
+
+    try {
+      if (alreadyLiked) {
+        // If already liked, remove the like from the database
+        const { error } = await supabase
+          .from('postLikes')
+          .delete()
+          .eq('postId', postId)
+          .eq('userId', user.id);
+        if (error) throw error;
+      } else {
+        // Check if the user has already liked this post (prevent multiple likes)
+        const { data: existingLike, error: fetchError } = await supabase
+          .from('postLikes')
+          .select('id')
+          .eq('postId', postId)
+          .eq('userId', user.id);
+
+        if (fetchError) throw fetchError;
+
+        // If no like is found, add the like
+        if (existingLike && existingLike.length === 0) {
+          const { error } = await supabase
+            .from('postLikes')
+            .insert({ postId, userId: user.id });
+          if (error) throw error;
+        }
+      }
+
+      // Update the liked posts state to reflect the change
+      setLikedPosts((prev) => {
+        const updated = new Set(prev);
+        if (alreadyLiked) {
+          updated.delete(postId);
+        } else {
+          updated.add(postId);
+        }
+        return updated;
+      });
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
   };
+
 
   const handleCommentSubmit = (postId) => {
     // Handle comment submission (you can push this comment to a database or manage it here)
@@ -106,7 +186,7 @@ const Home = () => {
     <ScreenWrapper>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>ConVo</Text>
+        <Text style={styles.headerTitle}>ConvoConnect</Text>
         <Pressable onPress={() => router.push('profile')} style={styles.profileImageContainer}>
           <Image source={{ uri: profileData?.image || 'https://via.placeholder.com/100' }} style={styles.profileImage} />
         </Pressable>
@@ -120,7 +200,7 @@ const Home = () => {
           posts.map((post) => (
             <View key={post.id} style={styles.postsFake}>
               <View style={styles.postHeader}>
-                <Pressable onPress={() => router.push(`/profile/${post.userId}`)}>
+                <Pressable onPress={() => router.push(`${post.users.id}`)}>
                   <Image source={{ uri: post.users?.image || 'https://via.placeholder.com/100' }} style={styles.profileImage} />
                 </Pressable>
                 <Text style={styles.userName}>{post.users?.name || 'Unknown User'}</Text>
@@ -152,7 +232,8 @@ const Home = () => {
                     <Ionicons name="paper-plane-outline" size={24} color="black" />
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.likes}>{post.likes} Likes</Text>
+                <Text style={styles.likes}>{likedPosts.has(post.id) ? `You and ${post.likeCount-1} others` : `${post.likeCount} Likes`}</Text>
+
                 <Text style={styles.caption}>{post.body}</Text>
                 <Text style={styles.time}>{formatTime(post.created_at)}</Text>
 
